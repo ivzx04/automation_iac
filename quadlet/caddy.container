@@ -1,0 +1,22 @@
+[Unit]
+Description=Reverse proxy (Caddy) for automation-pipeline
+After=automation-network.service
+Requires=automation-network.service
+
+[Container]
+Image=docker.io/library/caddy:2-alpine
+Network=automation.network
+PublishPort=8443:443
+
+# configuration data
+Volume=%h/.local/share/containers/Caddyfile:/etc/caddy/Caddyfile:ro
+
+# persistent application data
+Volume=caddy-data:/data
+ContainerName=automation-caddy
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target

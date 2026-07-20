@@ -1,0 +1,35 @@
+[Unit]
+Description=PostgreSQL Database
+After=network-online.target automation-network.service
+Requires=automation-network.service
+
+
+[Container]
+Image=docker.io/library/postgres:17
+ContainerName=automation-postgres
+
+Network=automation.network
+
+# main user for the postgres db (data that is not just stored on the n8n or nocodb side)
+Environment=POSTGRES_DB=automation
+Environment=POSTGRES_USER=automation
+
+Secret=postgres-password,type=mount,target=postgres-password
+Secret=n8n-db-password,type=env,target=N8N_DB_PASSWORD
+Secret=nocodb-db-password,type=env,target=NOCODB_DB_PASSWORD
+Environment=POSTGRES_PASSWORD_FILE=/run/secrets/postgres-password
+
+Volume=%h/.local/share/containers/postgres-init.sh:/docker-entrypoint-intitdb.d/init-multi-db.sh:ro,Z
+Volume=postgres-data:/var/lib/postgresql/data:Z,U
+
+# Optional but recommended health checks for this service
+HealthCmd=pg_isready -U automation -d automation
+HealthInterval=30s
+HealthTimeout=5s
+HealthRetries=5
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target

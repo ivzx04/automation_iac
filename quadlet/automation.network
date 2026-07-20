@@ -1,0 +1,12 @@
+[Unit]
+Description = automation network
+
+# I think this still needs some edits to properly work but hey, for now this is chill
+[Network]
+NetworkName=automation
+Subnet = 10.10.0.0/24
+Gateway = 10.10.0.1
+DNS = 9.9.9.9
+
+[Install]
+WantedBy = default.target
