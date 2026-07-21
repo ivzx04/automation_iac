@@ -6,15 +6,19 @@ Requires=automation-postgres.service
 [Container]
 Image=docker.io/nocodb/nocodb:latest
 ContainerName=automation-nocodb
-
 Network=automation.network
 
 Secret=nocodb-db-url,type=env,target=NC_DB
-
 Volume=nocodb-data:/usr/app/data:Z,U
+
+# IaC admin password and email 
+Environment=NC_ADMIN_EMAIL=admin@automation.local
+Secret=nocodb-admin-password,type=mount,target=nocodb-admin-password
+Environment=NC_ADMIN_PASSWORD_FILE=/run/secrets/nocodb-admin-password
 
 [Service]
 Restart=always
+RestartSec=30
 
 [Install]
 WantedBy=default.target

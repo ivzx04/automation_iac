@@ -9,7 +9,7 @@ create_if_missing() {
     echo "secret '$name' already exists, skipping"
   else
     printf '%s' "$value" | podman secret create "$name" -
-    echo "created secret '$name'"
+    echo "created secret '$name' with value '$value'"
   fi
 }
 
@@ -42,10 +42,40 @@ fi
 NOCODB_DB_PASS="$(podman secret inspect nocodb-db-password --showsecret --format '{{.SecretData}}' 2>/dev/null || true)"
 if [[ -z "$NOCODB_DB_PASS" ]]; then
   echo "WARNING: could not read back nocodb-db-password -- create nocodb-db-url manually:"
-  echo "  podman secret create nocodb-db-url - <<< 'pg://postgres:5432?u=nocodb&p=<password>&d=nocodb'"
+  echo "  podman secret create nocodb-db-url - <<< 'pg://automation-postgres:5432?u=nocodb&p=<password>&d=nocodb'"
 else
-  create_if_missing nocodb-db-url "pg://postgres:5432?u=nocodb&p=${NOCODB_DB_PASS}&d=nocodb"
+  create_if_missing nocodb-db-url "pg://automation-postgres:5432?u=nocodb&p=${NOCODB_DB_PASS}&d=nocodb"
 fi
+
+if podman secret exists n8n-owner-password-hash 2>/dev/null; then
+  echo "secret 'n8n-owner-password-hash' already exists, skipping"
+else
+  OWNER_PASS="$(openssl rand -base64 24)"
+  OWNER_HASH="$(podman run --rm docker.io/library/caddy:2-alpine caddy hash-password --plaintext "$OWNER_PASS")"
+  printf '%s' "$OWNER_HASH" | podman secret create n8n-owner-password-hash -
+  echo "created secret 'n8n-owner-password-hash'"
+  echo
+  echo "  >>> BACK THIS UP NOW, IT WILL NOT BE SHOWN AGAIN <<<"
+  echo "  n8n owner login password = ${OWNER_PASS}"
+  echo
+fi
+
+
+if podman secret exists nocodb-admin-password 2>/dev/null; then
+  echo "secret 'nocodb-admin-password' already exists, skipping"
+else
+  NC_PASS="$(openssl rand -base64 24)"
+  printf '%s' "$NC_PASS" | podman secret create nocodb-admin-password -
+  echo
+  echo "  >>> BACK THIS UP NOW, IT WILL NOT BE SHOWN AGAIN <<<"
+  echo "  NocoDB admin login password = ${NC_PASS}"
+  echo
+fi
+
+create_if_missing n8n-workflows-db-password "$(openssl rand -base64 32)"
+create_if_missing nocodb-domain-password "$(openssl rand -base64 32)"
+
+# add this in later and wire it up to prevent making admin accounts each time (also probably use python for the bcrypt pw hash requiered for n8n btw)
 
 echo "Done. Verify with: podman secret ls"
 

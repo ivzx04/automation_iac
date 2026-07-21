@@ -9,7 +9,7 @@ Network=automation.network
 PublishPort=8443:443
 
 # configuration data
-Volume=%h/.local/share/containers/Caddyfile:/etc/caddy/Caddyfile:ro
+Volume=${HOME}/.local/share/containers/Caddyfile:/etc/caddy/Caddyfile:ro
 
 # persistent application data
 Volume=caddy-data:/data
