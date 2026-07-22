@@ -4,7 +4,7 @@ After=automation-network.service
 Requires=automation-network.service
 
 [Container]
-Image=docker.io/library/caddy:2-alpine
+Image=docker.io/library/caddy:2.11.4-alpine
 Network=automation.network
 PublishPort=8443:443
 

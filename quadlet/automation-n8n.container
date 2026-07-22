@@ -4,7 +4,7 @@ After=automation-postgres.service
 Requires=automation-postgres.service
 
 [Container]
-Image=docker.io/n8nio/n8n
+Image=docker.io/n8nio/n8n:2.32.0
 ContainerName=automation-n8n
 Network=automation.network
 

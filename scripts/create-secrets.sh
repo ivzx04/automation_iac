@@ -14,19 +14,21 @@ create_if_missing() {
 }
 
 # Postgres superuser password
-if ! podman secret exists postgres-password 2>/dev/null; then
-  create_if_missing postgres-password "$(openssl rand -base64 32)"
-fi
+create_if_missing postgres-password "$(openssl rand -hex 32)"
 
-create_if_missing n8n-db-password "$(openssl rand -base64 32)"
-create_if_missing nocodb-db-password "$(openssl rand -base64 32)"
+# internal storage for n8n and nocodb passwords on postgres (separate from 'prod' data)
+create_if_missing n8n-db-password "$(openssl rand -hex 32)"
+
+NC_PASS="$(openssl rand -hex 32)"
+create_if_missing nocodb-db-password "$NC_PASS" 
+create_if_missing nocodb-db-url "pg://automation-postgres:5432?u=nocodb&p=${NC_PASS}&d=nocodb"
 
 # n8n's credential-at-rest encryption key. Generated once, never
 # rotated automatically (n8n has no key-rotation path) -- back this
 # up externally (password manager) the moment it's created, since
 # losing it makes every stored n8n credential permanently unreadable.
 if ! podman secret exists n8n-encryption-key 2>/dev/null; then
-  KEY="$(openssl rand -base64 32)"
+  KEY="$(openssl rand -hex 32)"
   printf '%s' "$KEY" | podman secret create n8n-encryption-key -
   echo "created secret 'n8n-encryption-key'"
   echo
@@ -35,22 +37,14 @@ if ! podman secret exists n8n-encryption-key 2>/dev/null; then
   echo
 fi
 
-# NocoDB's full connection string as a single secret, injected as an
-# env var directly (type=env in the quadlet unit) since NC_DB has no
-# native _FILE support. Values here must match n8n-db-password /
-# nocodb-db-password above and whatever the postgres init script creates.
-NOCODB_DB_PASS="$(podman secret inspect nocodb-db-password --showsecret --format '{{.SecretData}}' 2>/dev/null || true)"
-if [[ -z "$NOCODB_DB_PASS" ]]; then
-  echo "WARNING: could not read back nocodb-db-password -- create nocodb-db-url manually:"
-  echo "  podman secret create nocodb-db-url - <<< 'pg://automation-postgres:5432?u=nocodb&p=<password>&d=nocodb'"
-else
-  create_if_missing nocodb-db-url "pg://automation-postgres:5432?u=nocodb&p=${NOCODB_DB_PASS}&d=nocodb"
-fi
 
+# this one was a little annoying bc n8n requires a bcrypt pw to functoin, but i basically 
+# got away with it by having it launch a cheeky caddy container 
+# that would then launch hash it itself to prevent needing other dependancies
 if podman secret exists n8n-owner-password-hash 2>/dev/null; then
   echo "secret 'n8n-owner-password-hash' already exists, skipping"
 else
-  OWNER_PASS="$(openssl rand -base64 24)"
+  OWNER_PASS="$(openssl rand -hex 24)"
   OWNER_HASH="$(podman run --rm docker.io/library/caddy:2-alpine caddy hash-password --plaintext "$OWNER_PASS")"
   printf '%s' "$OWNER_HASH" | podman secret create n8n-owner-password-hash -
   echo "created secret 'n8n-owner-password-hash'"
@@ -60,22 +54,12 @@ else
   echo
 fi
 
+# admin pass for nocodb
+create_if_missing nocodb-admin-password "$(openssl rand -hex 24)"
 
-if podman secret exists nocodb-admin-password 2>/dev/null; then
-  echo "secret 'nocodb-admin-password' already exists, skipping"
-else
-  NC_PASS="$(openssl rand -base64 24)"
-  printf '%s' "$NC_PASS" | podman secret create nocodb-admin-password -
-  echo
-  echo "  >>> BACK THIS UP NOW, IT WILL NOT BE SHOWN AGAIN <<<"
-  echo "  NocoDB admin login password = ${NC_PASS}"
-  echo
-fi
-
-create_if_missing n8n-workflows-db-password "$(openssl rand -base64 32)"
-create_if_missing nocodb-domain-password "$(openssl rand -base64 32)"
-
-# add this in later and wire it up to prevent making admin accounts each time (also probably use python for the bcrypt pw hash requiered for n8n btw)
+# passwords that get used on the main automation database
+create_if_missing n8n-workflows-db-password "$(openssl rand -hex 32)"
+create_if_missing nocodb-domain-password "$(openssl rand -hex 32)"
 
 echo "Done. Verify with: podman secret ls"
 
