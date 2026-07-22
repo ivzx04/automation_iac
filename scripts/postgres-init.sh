@@ -39,8 +39,10 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
     GRANT CONNECT ON DATABASE automation TO nocodb_domain;
     GRANT USAGE, CREATE ON SCHEMA public TO nocodb_domain;
 
+    ALTER DEFAULT PRIVILEGES FOR ROLE nocodb_domain IN SCHEMA public
+      GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO n8n_workflows;
 
-    GRANT SELECT, INSERT, UPDATE ON ALL TABLES IN SCHEMA public TO n8n_workflows;
-    GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO nocodb_user;
+    ALTER DEFAULT PRIVILEGES FOR ROLE n8n_workflows IN SCHEMA public
+      GRANT SELECT, INSERT, UPDATE ON TABLES TO nocodb_domain;
 
 EOSQL

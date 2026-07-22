@@ -60,6 +60,7 @@ echo "Now starting services:"
 sudo -u ${USER} -H XDG_RUNTIME_DIR=/run/user/${USER_UID}   systemctl --user daemon-reload
 sudo -u ${USER} -H XDG_RUNTIME_DIR=/run/user/${USER_UID}   systemctl --user start automation-postgres.service 
 echo  "Started postgres"
+sleep 35 ## just to let postgres fully spin up before going onto the other services and preventing stale data 
 sudo -u ${USER} -H XDG_RUNTIME_DIR=/run/user/${USER_UID}   systemctl --user start automation-nocodb.service 
 echo  "Started nocodb"
 sudo -u ${USER} -H XDG_RUNTIME_DIR=/run/user/${USER_UID}   systemctl --user start automation-n8n.service 
