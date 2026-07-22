@@ -36,7 +36,6 @@ Timezone=Europe/Berlin
 
 PublishPort=127.0.0.1:5678:5678
 
-Memory=2g
 PodmanArgs=--cpus=2
 
 Volume=n8n_data:/home/node/.n8n:Z,U
