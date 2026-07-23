@@ -6,7 +6,10 @@ Requires=automation-network.service
 [Container]
 Image=docker.io/library/caddy:2.11.4-alpine
 Network=automation.network
-PublishPort=8443:443
+# PublishPort=8443:443
+
+PublishPort=4002:4002
+PublishPort=4003:4003
 
 # configuration data
 Volume=${HOME}/.local/share/containers/Caddyfile:/etc/caddy/Caddyfile:ro
