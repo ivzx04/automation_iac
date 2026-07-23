@@ -1,9 +1,9 @@
-n8n.automation.local:4002 {
+n8n.automation.internal:4002 {
 	tls internal
 	reverse_proxy automation-n8n:5678
 }
 
-admin.automation.local:4003 {
+admin.automation.internal:4003 {
 	tls internal
 	reverse_proxy automation-nocodb:8080
 }
