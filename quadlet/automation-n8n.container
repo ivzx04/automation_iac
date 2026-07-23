@@ -13,8 +13,8 @@ Secret=n8n-db-password,type=mount,target=n8n-db-password
 
 Environment=N8N_ENCRYPTION_KEY=/run/secrets/n8n-encryption-key
 
-Environment=N8N_EDITOR_BASE_URL=https://n8n.automation.local:8443
-Environment=WEBHOOK_URL=https://n8n.automation.local:8443/hooks/
+Environment=N8N_EDITOR_BASE_URL=https://n8n.automation.local:4002
+Environment=WEBHOOK_URL=https://n8n.automation.local:4002/hooks/
 
 # point to postgresdb for unified storage of n8n internal data (different from the n8n_workflow account that is used with workflow credentials)
 Environment=DB_TYPE=postgresdb
