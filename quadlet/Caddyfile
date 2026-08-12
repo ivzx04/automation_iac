@@ -1,9 +1,9 @@
-n8n.automation.internal:4002 {
-	tls internal
-	reverse_proxy automation-n8n:5678
+n8n.automation.caisa.bit.uni-bonn.de {
+        tls /etc/letsencrypt/live/n8n.automation.caisa.bit.uni-bonn.de/fullchain.pem  /etc/letsencrypt/live/n8n.automation.caisa.bit.uni-bonn.de/privkey.pem
+        reverse_proxy automation-n8n:5678
 }
 
-admin.automation.internal:4003 {
-	tls internal
-	reverse_proxy automation-nocodb:8080
+admin.automation.caisa.bit.uni-bonn.de {
+        tls /etc/letsencrypt/live/admin.automation.caisa.bit.uni-bonn.de/fullchain.pem /etc/letsencrypt/live/admin.automation.caisa.bit.uni-bonn.de/privkey.pem
+        reverse_proxy automation-nocodb:8080
 }
