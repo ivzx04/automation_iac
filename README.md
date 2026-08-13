@@ -51,6 +51,14 @@ All services store their internal data on their own separate postgres databases 
 - caddy: 2.32.11-alpine 
 - postgres: 17.10
 
+## COMMON GOTCHAS:
+
+There is an n8n bug (perhaps it gets fixed later) which for forms makes them not show up at what is specified as the production url. The url will say <hostname>/hooks/form/<slug>, but the form is really hosted at <hostname>/form/<slug>.
+
+
+## certificate setup (see the letsencrypt instructions for more information on this)
+
+
 ## important TODO
 
 Postgres 'prod' data and the n8n workflows should probably get some kind of backup/migration strategy dedicated to them for this to be safe to deploy, but it has yet to be implemented.
